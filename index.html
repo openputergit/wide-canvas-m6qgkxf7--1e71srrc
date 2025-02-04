@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient QR Code Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .print-only {
+            display: none;
+        }
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            .print-only {
+                display: block !important;
+            }
+            body {
+                background-color: white;
+            }
+            #qrcode {
+                margin: 0 auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="min-h-screen py-8 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-xl mx-auto">
+            <!-- Form Container -->
+            <div class="bg-white rounded-lg shadow-lg p-6 mb-6 no-print">
+                <h1 class="text-2xl font-bold text-center mb-6 text-gray-800">Patient Information QR Generator</h1>
+                
+                <form id="patientForm" class="space-y-4">
+                    <div>
+                        <label for="fullName" class="block text-sm font-medium text-gray-700">Full Name</label>
+                        <input type="text" id="fullName" name="fullName" required
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                            placeholder="John Doe">
+                    </div>
+
+                    <div>
+                        <label for="passport" class="block text-sm font-medium text-gray-700">Passport Number</label>
+                        <input type="text" id="passport" name="passport" required
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                            placeholder="AB1234567">
+                    </div>
+
+                    <div>
+                        <label for="dob" class="block text-sm font-medium text-gray-700">Date of Birth</label>
+                        <input type="date" id="dob" name="dob" required
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Gender</label>
+                        <select id="gender" name="gender" required
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                            <option value="">Select Gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="vaccinations" class="block text-sm font-medium text-gray-700">Vaccinations Taken</label>
+                        <textarea id="vaccinations" name="vaccinations" required
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                            rows="3" placeholder="List vaccinations, separated by commas"></textarea>
+                    </div>
+
+                    <button type="submit"
+                        class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        Generate QR Code
+                    </button>
+                </form>
+            </div>
+
+            <!-- QR Result Container -->
+            <div id="qrResult" class="hidden bg-white rounded-lg shadow-lg p-6">
+                <div class="no-print">
+                    <h2 class="text-xl font-semibold mb-4 text-center">Generated QR Code</h2>
+                </div>
+                <div id="qrcode" class="mb-4 flex justify-center"></div>
+                <div class="space-y-3 no-print text-center">
+                    <button onclick="window.print()" class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
+                        <i class="bi bi-printer me-2"></i> Print QR Code
+                    </button>
+                    <button onclick="downloadQR()" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 ml-2">
+                        <i class="bi bi-download me-2"></i> Download QR
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+    <script>
+        document.getElementById('patientForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const patientData = {
+                fullName: document.getElementById('fullName').value,
+                passport: document.getElementById('passport').value,
+                dob: document.getElementById('dob').value,
+                gender: document.getElementById('gender').value,
+                vaccinations: document.getElementById('vaccinations').value.split(',').map(v => v.trim())
+            };
+
+            const qr = qrcode(0, 'M');
+            qr.addData(JSON.stringify(patientData));
+            qr.make();
+
+            document.getElementById('qrcode').innerHTML = qr.createImgTag(5);
+            document.getElementById('qrResult').classList.remove('hidden');
+        });
+
+        function downloadQR() {
+            const img = document.querySelector('#qrcode img');
+            const link = document.createElement('a');
+            link.download = 'patient-qr.png';
+            link.href = img.src;
+            link.click();
+        }
+    </script>
+<script>document.body.addEventListener('wheel', e => { if (!e.ctrlKey) return; e.preventDefault(); return }, { passive: false })</script>
+	</body>
+</html>
